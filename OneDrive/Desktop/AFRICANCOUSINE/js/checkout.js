@@ -44,7 +44,6 @@ function showEmptyCart() {
         </div>
     `;
     
-    // Hide checkout form if visible
     const checkoutForm = document.getElementById('checkout-form');
     if (checkoutForm) {
         checkoutForm.classList.remove('active');
@@ -57,7 +56,7 @@ function renderCart() {
     
     let cartHTML = '<div class="cart-items">';
     
-    currentCart.forEach((item, index) => {
+    currentCart.forEach(function(item, index) {
         cartHTML += `
             <div class="cart-item" data-index="${index}">
                 <img src="${item.image_path || './uploads/default-food.jpg'}" alt="${item.name}" class="cart-item-image">
@@ -84,7 +83,6 @@ function renderCart() {
     
     cartHTML += '</div>';
     
-    // Add cart summary
     cartHTML += `
         <div class="cart-summary">
             <div class="summary-row">
@@ -114,7 +112,7 @@ function renderCart() {
 
 // Calculate and display totals
 function calculateTotals() {
-    const subtotal = currentCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const subtotal = currentCart.reduce(function(sum, item) { return sum + (item.price * item.quantity); }, 0);
     const tax = subtotal * 0.08;
     const deliveryFee = 2.99;
     const total = subtotal + tax + deliveryFee;
@@ -124,7 +122,7 @@ function calculateTotals() {
     document.getElementById('delivery-fee').textContent = '$' + deliveryFee.toFixed(2);
     document.getElementById('total').textContent = '$' + total.toFixed(2);
     
-    return { subtotal, tax, deliveryFee, total };
+    return { subtotal: subtotal, tax: tax, deliveryFee: deliveryFee, total: total };
 }
 
 // Update item quantity
@@ -145,7 +143,6 @@ function removeItem(index) {
     currentCart.splice(index, 1);
     saveCart();
     loadCart();
-    
     showNotification('Item removed from cart', 'info');
 }
 
@@ -155,35 +152,21 @@ function saveCart() {
     updateCartCount();
 }
 
-// Update cart count badge
-function updateCartCount() {
-    const countElements = document.querySelectorAll('.cart-count');
-    const totalItems = currentCart.reduce((sum, item) => sum + item.quantity, 0);
-    
-    countElements.forEach(el => {
-        el.textContent = totalItems;
-    });
-}
-
 // Setup event listeners
 function setupEventListeners() {
-    // Proceed to checkout button
     document.addEventListener('click', function(e) {
         if (e.target.id === 'proceed-checkout-btn' || e.target.closest('#proceed-checkout-btn')) {
             showCheckoutForm();
         }
         
-        // Back to cart button
         if (e.target.id === 'back-to-cart-btn' || e.target.closest('#back-to-cart-btn')) {
             hideCheckoutForm();
         }
         
-        // Place order button
         if (e.target.id === 'place-order-btn' || e.target.closest('#place-order-btn')) {
             placeOrder();
         }
         
-        // Payment method selection
         if (e.target.classList.contains('payment-method') || e.target.closest('.payment-method')) {
             const method = e.target.closest('.payment-method');
             selectPaymentMethod(method);
@@ -201,13 +184,11 @@ function showCheckoutForm() {
         checkoutForm.classList.add('active');
         if (cartItems) cartItems.style.display = 'none';
         if (cartSummary) cartSummary.style.display = 'none';
-        
-        // Scroll to form
         checkoutForm.scrollIntoView({ behavior: 'smooth' });
     }
 }
 
-// Hide checkout form (back to cart)
+// Hide checkout form
 function hideCheckoutForm() {
     const checkoutForm = document.getElementById('checkout-form');
     const cartItems = document.querySelector('.cart-items');
@@ -222,7 +203,7 @@ function hideCheckoutForm() {
 
 // Select payment method
 function selectPaymentMethod(element) {
-    document.querySelectorAll('.payment-method').forEach(el => {
+    document.querySelectorAll('.payment-method').forEach(function(el) {
         el.classList.remove('active');
     });
     element.classList.add('active');
@@ -271,7 +252,6 @@ async function placeOrder() {
     const totals = calculateTotals();
     const placeOrderBtn = document.getElementById('place-order-btn');
     
-    // Disable button and show loading
     placeOrderBtn.disabled = true;
     placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Placing Order...';
     
@@ -281,18 +261,20 @@ async function placeOrder() {
             customer_phone: customerInfo.phone,
             customer_address: customerInfo.address,
             payment_method: customerInfo.paymentMethod,
-            items: currentCart.map(item => ({
-                menu_item_id: item.id,
-                quantity: item.quantity,
-                price_at_time: item.price
-            })),
+            items: currentCart.map(function(item) {
+                return {
+                    menu_item_id: item.id,
+                    quantity: item.quantity,
+                    price_at_time: item.price
+                };
+            }),
             subtotal: totals.subtotal,
             tax: totals.tax,
             delivery_fee: totals.deliveryFee,
             total: totals.total
         };
         
-        const response = await fetch(`${API_BASE_URL}/api/orders`, {
+        const response = await fetch(API_BASE_URL + '/api/orders', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -303,16 +285,12 @@ async function placeOrder() {
         const data = await response.json();
         
         if (response.ok && data.success) {
-            // Clear cart
             localStorage.removeItem('cart');
             updateCartCount();
-            
-            // Show success and redirect
             showNotification('Order placed successfully!', 'success');
             
-            // Redirect to order confirmation
-            setTimeout(() => {
-                window.location.href = `order-confirmation.html?order_id=${data.order_id}`;
+            setTimeout(function() {
+                window.location.href = 'order-confirmation.html?order_id=' + data.order_id;
             }, 1500);
         } else {
             throw new Error(data.message || 'Failed to place order');
@@ -320,16 +298,13 @@ async function placeOrder() {
     } catch (error) {
         console.error('Order error:', error);
         showNotification(error.message || 'Failed to place order. Please try again.', 'error');
-        
-        // Re-enable button
         placeOrderBtn.disabled = false;
         placeOrderBtn.innerHTML = '<i class="fas fa-check-circle"></i> Place Order';
     }
 }
 
 // Show notification
-function showNotification(message, type = 'info') {
-    // Remove existing notifications
+function showNotification(message, type) {
     const existing = document.querySelector('.cart-notification');
     if (existing) {
         existing.remove();
@@ -337,43 +312,12 @@ function showNotification(message, type = 'info') {
     
     const notif = document.createElement('div');
     notif.className = 'cart-notification';
-    notif.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        padding: 15px 25px;
-        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
-        color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 10000;
-        font-weight: 500;
-        animation: slideInRight 0.3s ease;
-        max-width: 300px;
-    `;
-    notif.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
-        ${message}
-    `;
+    notif.style.cssText = 'position: fixed; top: 100px; right: 20px; padding: 15px 25px; background: ' + (type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8') + '; color: white; border-radius: 8px; z-index: 10000; font-weight: 500;';
+    notif.innerHTML = '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle') + '"></i> ' + message;
     
     document.body.appendChild(notif);
     
-    setTimeout(() => {
-        notif.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => notif.remove(), 300);
+    setTimeout(function() {
+        notif.remove();
     }, 3000);
 }
-
-// Add CSS animation for notifications
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOutRight {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
