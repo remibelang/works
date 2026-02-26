@@ -59,7 +59,7 @@ function renderCart() {
     currentCart.forEach(function(item, index) {
         cartHTML += `
             <div class="cart-item" data-index="${index}">
-                <img src="${item.image_path || './uploads/default-food.jpg'}" alt="${item.name}" class="cart-item-image">
+                <img src="${item.image_path || './uploads/jelof-rice.jpg'}" alt="${item.name}" class="cart-item-image">
                 <div class="cart-item-details">
                     <h3>${item.name}</h3>
                     <p>$${parseFloat(item.price).toFixed(2)} each</p>
@@ -274,17 +274,18 @@ async function placeOrder() {
             total: totals.total
         };
         
-        const response = await fetch(API_BASE_URL + '/api/orders', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(orderData)
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
+        // Store order in localStorage (no backend API)
+        const orders = JSON.parse(localStorage.getItem('orders')) || [];
+        orderData.id = 'ORD-' + Date.now();
+        orderData.order_id = orderData.id;
+        orderData.status = 'pending';
+        orderData.createdAt = new Date().toISOString();
+        orders.push(orderData);
+        localStorage.setItem('orders', JSON.stringify(orders));
+
+        const data = { success: true, order_id: orderData.id, message: 'Order placed successfully!' };
+
+        if (data.success) {
             localStorage.removeItem('cart');
             updateCartCount();
             showNotification('Order placed successfully!', 'success');
@@ -293,7 +294,7 @@ async function placeOrder() {
                 window.location.href = 'order-confirmation.html?order_id=' + data.order_id;
             }, 1500);
         } else {
-            throw new Error(data.message || 'Failed to place order');
+            // Order saved successfully;
         }
     } catch (error) {
         console.error('Order error:', error);
@@ -321,3 +322,8 @@ function showNotification(message, type) {
         notif.remove();
     }, 3000);
 }
+
+
+
+
+

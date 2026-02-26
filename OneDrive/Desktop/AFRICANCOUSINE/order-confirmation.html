@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - Mama's Kitchen</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #16213e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #e94560;
+            text-align: center;
+            border-bottom: 2px solid #e94560;
+            padding-bottom: 15px;
+        }
+        .success-message {
+            background: #0f3460;
+            color: #4caf50;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            border-left: 4px solid #4caf50;
+        }
+        .order-details {
+            background: #1a1a2e;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .order-details h2 {
+            color: #e94560;
+            margin-top: 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #0f3460;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #a0a0a0;
+        }
+        .detail-value {
+            color: #fff;
+        }
+        .items-list {
+            margin-top: 20px;
+        }
+        .item {
+            background: #0f3460;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .total-section {
+            background: #e94560;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .btn {
+            display: inline-block;
+            background: #e94560;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #c13651;
+        }
+        .btn-container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-check-circle"></i> Order Confirmed!</h1>
+        
+        <div class="success-message">
+            <h2>Thank you for your order!</h2>
+            <p>Your order has been placed successfully and is being prepared.</p>
+        </div>
+        
+        <div class="order-details">
+            <h2>Order Details</h2>
+            <div id="order-info">
+                <div class="detail-row">
+                    <span class="detail-label">Order ID:</span>
+                    <span class="detail-value" id="order-id">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Customer Name:</span>
+                    <span class="detail-value" id="customer-name">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phone:</span>
+                    <span class="detail-value" id="customer-phone">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Address:</span>
+                    <span class="detail-value" id="customer-address">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method:</span>
+                    <span class="detail-value" id="payment-method">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Order Date:</span>
+                    <span class="detail-value" id="order-date">Loading...</span>
+                </div>
+            </div>
+            
+            <div class="items-list" id="items-list">
+                <h3>Ordered Items</h3>
+                <!-- Items will be loaded here -->
+            </div>
+            
+            <div class="total-section" id="total-section">
+                Total: $0.00
+            </div>
+        </div>
+        
+        <div class="btn-container">
+            <a href="index.html" class="btn"><i class="fas fa-utensils"></i Continue Shopping</a>
+            <a href="track-order.html" class="btn" style="margin-left: 10px;"><i class="fas fa-map-marker-alt"></i> Track Order</a>
+        </div>
+    </div>
+
+    <script>
+        // Load order details from URL and localStorage
+        function loadOrderDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order_id');
+            
+            if (!orderId) {
+                document.getElementById('order-info').innerHTML = '<p style="color: #e94560;">No order ID found. Please check your order history.</p>';
+                return;
+            }
+            
+            // Get order from localStorage
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const order = orders.find(o => o.id === orderId || o.order_id === orderId);
+            
+            if (!order) {
+                document.getElementById('order-info').innerHTML = '<p style="color: #e94560;">Order not found. It may have been cleared.</p>';
+                return;
+            }
+            
+            // Display order details
+            document.getElementById('order-id').textContent = order.id || order.order_id;
+            document.getElementById('customer-name').textContent = order.customer_name || 'N/A';
+            document.getElementById('customer-phone').textContent = order.customer_phone || 'N/A';
+            document.getElementById('customer-address').textContent = order.customer_address || 'N/A';
+            document.getElementById('payment-method').textContent = order.payment_method || 'Cash on Delivery';
+            document.getElementById('order-date').textContent = new Date(order.createdAt).toLocaleString() || 'N/A';
+            
+            // Display items
+            const itemsList = document.getElementById('items-list');
+            if (order.items && order.items.length > 0) {
+                let itemsHtml = '<h3>Ordered Items</h3>';
+                order.items.forEach(item => {
+                    const itemTotal = (item.price_at_time || item.price || 0) * (item.quantity || 1);
+                    itemsHtml += `
+                        <div class="item">
+                            <span>${item.name || 'Item'} x ${item.quantity || 1}</span>
+                            <span>$${itemTotal.toFixed(2)}</span>
+                        </div>
+                    `;
+                });
+                itemsList.innerHTML = itemsHtml;
+            }
+            
+            // Display total
+            const total = order.total || (order.subtotal + order.tax + order.delivery_fee) || 0;
+            document.getElementById('total-section').textContent = `Total: $${total.toFixed(2)}`;
+        }
+        
+        // Load order when page loads
+        document.addEventListener('DOMContentLoaded', loadOrderDetails);
+    </script>
+</body>
+</html>

@@ -1,3 +1,9 @@
+// API Configuration
+const api_base_url = window.location.origin; // Uses current domain
+const API_BASE_URL = api_base_url; // Alias for compatibility (uppercase)
+
+// Or set manually: const api_base_url = "http://localhost:8000";
+
 // Firebase Configuration - African Cuisine
 // NOTE: These are DUMMY values - replace with real Firebase credentials later
 
@@ -23,5 +29,5 @@ if (typeof firebase !== 'undefined') {
 
 // Export for modules
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = firebaseConfig;
+    module.exports = { firebaseConfig, api_base_url, API_BASE_URL };
 }

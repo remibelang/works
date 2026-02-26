@@ -1,51 +1,125 @@
+// Load menu items from local JSON file
 async function loadMenuItems() {
     try {
-        const response = await fetch('http://localhost:5000/api/menu');
+        const response = await fetch('menu.json');
+        if (!response.ok) {
+            throw new Error('Failed to load menu');
+        }
         const data = await response.json();
-        
-        const container = document.getElementById('menu-container');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        
-        data.items.forEach(item => {
-            const card = createMenuItemCard(item);
-            container.appendChild(card);
-        });
+        displayMenuItems(data.menu);
     } catch (error) {
         console.error('Error loading menu:', error);
+        // Fallback: load hardcoded menu if JSON fails
+        loadHardcodedMenu();
     }
 }
 
-function createMenuItemCard(item) {
-    const div = document.createElement('div');
-    div.className = 'menu-item';
-    div.innerHTML = `
-        <img src=".${item.image_path || 'assets/images/placeholder.jpg'}" alt="${item.name}" class="menu-item-image">
-        <div class="menu-item-content">
-            <div class="menu-item-header">
-                <div>
-                    <h3 class="menu-item-title">${item.name}</h3>
-                    <p class="menu-item-description">${item.description}</p>
-                </div>
-                <span class="menu-item-price">$${item.price}</span>
-            </div>
-            <button class="add-to-cart-btn" onclick="addToCart(${item.id}, '${item.name}', ${item.price}, '.${item.image_path}')">
-                <i class="fas fa-cart-plus"></i> Add to Cart
-            </button>
-        </div>
-    `;
-    return div;
+// Fallback hardcoded menu
+function loadHardcodedMenu() {
+    const menu = [
+        {
+            id: 1,
+            name: "Jollof Rice",
+            description: "Classic West African rice dish",
+            price: 15.99,
+            image_path: "./uploads/jelof-rice.jpg"
+        },
+        {
+            id: 2,
+            name: "Fufu Corn and Khati Khati",
+            description: "Traditional corn fufu with khati khati soup",
+            price: 18.99,
+            image_path: "./uploads/1771044943351-fufu-corn and khati khati.jpg"
+        },
+        {
+            id: 3,
+            name: "Pounded Yam and Egusi Soup",
+            description: "Smooth pounded yam with egusi soup",
+            price: 19.99,
+            image_path: "./uploads/1771045253898-pounded Yam and Egussi Soup.jpg"
+        },
+        {
+            id: 4,
+            name: "Puff Puff and Beans",
+            description: "Sweet fried dough with beans",
+            price: 12.99,
+            image_path: "./uploads/1771045535447-puff-and-beans.webp"
+        },
+        {
+            id: 5,
+            name: "Suya",
+            description: "Spicy grilled meat skewers",
+            price: 14.99,
+            image_path: "./uploads/1771046757558-suya.jpg"
+        }
+    ];
+    displayMenuItems(menu);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadMenuItems();
+// Display menu items on the page
+function displayMenuItems(menuItems) {
+    const menuContainer = document.getElementById('menu-container');
+    if (!menuContainer) {
+        console.error('Menu container not found');
+        return;
+    }
     
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    filterButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    menuContainer.innerHTML = menuItems.map(item => `
+        <div class="menu-item" data-id="${item.id}">
+            <img src="${item.image_path}" alt="${item.name}" onerror="this.src='./uploads/jelof-rice.jpg'">
+            <h3>${item.name}</h3>
+            <p>${item.description}</p>
+            <p class="price">$${item.price.toFixed(2)}</p>
+            <button onclick="addToCart(${item.id})">Add to Cart</button>
+        </div>
+    `).join('');
+}
+
+// Add to cart function
+function addToCart(itemId) {
+    fetch('menu.json')
+        .then(response => response.json())
+        .then(data => {
+            const item = data.menu.find(i => i.id === itemId);
+            if (item) {
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                
+                // Check if item already exists in cart
+                const existingItem = cart.find(i => i.id === itemId);
+                if (existingItem) {
+                    existingItem.quantity = (existingItem.quantity || 1) + 1;
+                } else {
+                    // Add new item with quantity
+                    item.quantity = 1;
+                    item.quantity = 1; cart.push(item);
+                }
+                
+                localStorage.setItem('cart', JSON.stringify(cart));
+                alert(`${item.name} added to cart!`);
+                updateCartCount();
+            }
+        })
+        .catch(() => {
+            // Fallback if JSON not available
+            const hardcodedItems = {
+                1: {id: 1, name: "Jollof Rice", price: 15.99, image_path: "./uploads/jelof-rice.jpg"},
+                2: {id: 2, name: "Fufu Corn and Khati Khati", price: 18.99, image_path: "./uploads/1771044943351-fufu-corn and khati khati.jpg"},
+                3: {id: 3, name: "Pounded Yam and Egusi Soup", price: 19.99, image_path: "./uploads/1771045253898-pounded Yam and Egussi Soup.jpg"},
+                4: {id: 4, name: "Puff Puff and Beans", price: 12.99, image_path: "./uploads/1771045535447-puff-and-beans.webp"},
+                5: {id: 5, name: "Suya", price: 14.99, image_path: "./uploads/1771046757558-suya.jpg"}
+            };
+            const item = hardcodedItems[itemId];
+            if (item) {
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                item.quantity = 1; cart.push(item);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                alert(`${item.name} added to cart!`);
+            }
         });
-    });
-});
+}
+
+// Load menu when page loads
+document.addEventListener('DOMContentLoaded', loadMenuItems);
+
+
+

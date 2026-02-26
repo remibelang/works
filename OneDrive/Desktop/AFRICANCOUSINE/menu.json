@@ -1,0 +1,45 @@
+{
+    "menu":  [
+                 {
+                     "id":  1,
+                     "name":  "Jollof Rice",
+                     "description":  "Classic West African rice dish cooked in tomato-based stew",
+                     "price":  15.99,
+                     "image_path":  "./uploads/jelof-rice.jpg",
+                     "category":  "main"
+                 },
+                 {
+                     "id":  2,
+                     "name":  "Fufu Corn and Khati Khati",
+                     "description":  "Traditional corn fufu served with spicy khati khati soup",
+                     "price":  18.99,
+                     "image_path":  "./uploads/1771044943351-fufu-corn and khati khati.jpg",
+                     "category":  "main"
+                 },
+                 {
+                     "id":  3,
+                     "name":  "Pounded Yam and Egusi Soup",
+                     "description":  "Smooth pounded yam with rich egusi melon seed soup",
+                     "price":  19.99,
+                     "image_path":  "./uploads/1771045253898-pounded Yam and Egussi Soup.jpg",
+                     "category":  "main"
+                 },
+                 {
+                     "id":  4,
+                     "name":  "Puff Puff and Beans",
+                     "description":  "Sweet fried dough balls served with beans",
+                     "price":  12.99,
+                     "image_path":  "./uploads/1771045535447-puff-and-beans.webp",
+                     "category":  "snack"
+                 },
+                 {
+                     "id":  5,
+                     "name":  "Suya",
+                     "description":  "Spicy grilled meat skewers with peanut spice",
+                     "price":  14.99,
+                     "image_path":  "./uploads/1771046757558-suya.jpg",
+                     "category":  "appetizer"
+                 }
+             ]
+}
+
